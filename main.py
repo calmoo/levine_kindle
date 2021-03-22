@@ -84,7 +84,7 @@ def send_to_kindle(filepath):
     body = "Newsletter"
     message = MIMEMultipart()
     message["From"] = sender_email
-    message["To"] = receiver_email
+    message["To"] = kindle_email
     message["Subject"] = subject
     message.attach(MIMEText(body, "plain"))
     with open(filepath, "rb") as attachment:
