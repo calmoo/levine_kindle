@@ -10,7 +10,7 @@ from datetime import datetime
 import smtplib
 import ssl
 import config
-from email import encoders
+from email import encoders, utils
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -18,29 +18,43 @@ from email.mime.text import MIMEText
 sender_email = config.email_account
 kindle_email = config.kindle_email
 password = config.email_password
+imap_host_name = config.imap_host
 
 
-def get_email_body():
+def email_is_from_today(message):
+    received_time = email.utils.parsedate_tz(message['Date'])
+    received_time_utc = datetime.fromtimestamp(email.utils.mktime_tz(received_time))
+    return received_time_utc.date() == datetime.today().date()
+
+
+def get_imap_session(imap_email, imap_password, imap_host):
     print("Logging into IMAP")
-    imap = imaplib.IMAP4_SSL(config.imap_host)
-    imap.login(sender_email, password)
-    status, messages = imap.select("Matt")
+    imap = imaplib.IMAP4_SSL(imap_host)
+    imap.login(imap_email, imap_password)
+    return imap
+
+
+def get_latest_email(imap_session):
+    status, messages = imap_session.select("Matt")
     latest_email_id = int(messages[0])
     print("Fetching latest email")
-    res, msg = imap.fetch(str(latest_email_id), "(RFC822)")
+    res, message = imap_session.fetch(str(latest_email_id), "(RFC822)")
 
-    for response in msg:
+    for response in message:
         if isinstance(response, tuple):
-            msg = email.message_from_bytes(response[1])
-            for part in msg.walk():
-                content_type = part.get_content_type()
-                body = part.get_payload(decode=True)
-                if body:
-                    body = body.decode()
-                if content_type == "text/html":
-                    imap.close()
-                    imap.logout()
-                    return body
+            return email.message_from_bytes(response[1])
+
+
+def get_email_body(message, imap_session):
+    for part in message.walk():
+        content_type = part.get_content_type()
+        body = part.get_payload(decode=True)
+        if body:
+            body = body.decode()
+        if content_type == "text/html":
+            imap_session.close()
+            imap_session.logout()
+            return body
 
 
 def format_text(text):
@@ -104,19 +118,22 @@ def send_to_kindle(filepath):
         print("Logging in to SMTP")
         server.login(sender_email, password)
         print("Sending email")
-        server.sendmail(sender_email, kindle_email, text)
+        server.sendmail(sender_email, "test@test.com", text)
 
 
 if __name__ == "__main__":
     if not file_exists(generate_filepath()):
-        email_text = get_email_body()
-        formatted_text = format_text(email_text)
-        rtf_filepath = write_to_rtf(formatted_text, generate_filepath())
-        try:
-            send_to_kindle(rtf_filepath)
-            print("Email sent to kindle")
-        except:
-            os.remove(rtf_filepath)
-            print("Unable to send to kindle, deleted file")
+        imap_session = get_imap_session(imap_email=sender_email, imap_password=password, imap_host=imap_host_name)
+        latest_email = get_latest_email(imap_session)
+        if email_is_from_today(latest_email):
+            email_body = get_email_body(latest_email, imap_session)
+            formatted_text = format_text(email_body)
+            rtf_filepath = write_to_rtf(formatted_text, generate_filepath())
+            try:
+                send_to_kindle(rtf_filepath)
+                print("Email sent to kindle")
+            except:
+                os.remove(rtf_filepath)
+                print("Unable to send to kindle, deleted file")
     else:
         print("Newsletter has already been fetched today")
