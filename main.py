@@ -104,7 +104,7 @@ def send_to_kindle(filepath):
         print("Logging in to SMTP")
         server.login(sender_email, password)
         print("Sending email")
-        server.sendmaail(sender_email, kindle_email, text)
+        server.sendmail(sender_email, kindle_email, text)
 
 
 if __name__ == "__main__":
@@ -116,7 +116,7 @@ if __name__ == "__main__":
             send_to_kindle(rtf_filepath)
             print("Email sent to kindle")
         except:
-            os.remove(os.path.dirname(rtf_filepath))
+            os.remove(rtf_filepath)
             print("Unable to send to kindle, deleted file")
     else:
         print("Newsletter has already been fetched today")
