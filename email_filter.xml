@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<feed xmlns='http://www.w3.org/2005/Atom' xmlns:apps='http://schemas.google.com/apps/2006'>
+	<title>Mail Filters</title>
+	<id>tag:mail.google.com,2008:filters:z0000001616354437033*0596316909148501774</id>
+	<updated>2021-03-23T20:12:22Z</updated>
+	<author>
+		<name></name>
+		<email></email>
+	</author>
+	<entry>
+		<category term='filter'></category>
+		<title>Mail Filter</title>
+		<id>tag:mail.google.com,2008:filter:z0000001616354437033*0596316909148501774</id>
+		<updated>2021-03-23T20:12:22Z</updated>
+		<content></content>
+		<apps:property name='subject' value='Money Stuff'/>
+		<apps:property name='doesNotHaveTheWord' value='Kindle'/>
+		<apps:property name='label' value='Matt'/>
+		<apps:property name='sizeOperator' value='s_sl'/>
+		<apps:property name='sizeUnit' value='s_smb'/>
+	</entry>
+</feed>
