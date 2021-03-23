@@ -1,14 +1,19 @@
-# levine_text_extract
+## Levine to Kindle fetcher
 
-- Connects to an email account via IMAP
-- Looks for an IMAP folder called "Matt"
-- Gets latest newsletter
-- Parses to markdown from email html, then to rtf
-- Writes rtf
-- Attaches rtf to email and sends to kindle via SMTP
+A Python script that grabs [Matt Levine's Money Stuff Newsletter](https://www.bloomberg.com/opinion/authors/ARbTQlRLRjE/matthew-s-levine), formats it nicely and sends to an Amazon Kindle.
+
+Basic program flow:
+
+- Connects to an email account via IMAP.
+- Checks if the newsletter has already been downloaded - exits if so.
+- Looks for an IMAP folder called "Matt".
+- Gets the HTML body of the latest newsletter.
+- Parses to markdown, then to rtf.
+- Writes the rtf file to `/files`.
+- Attaches rtf and sends to Kindle via SMTP.
 
 ## Install dependencies
-Tested on Ubuntu  18.04.1 LTS - would most likely work on MacOS too.
+Tested on Python 3.8 on Ubuntu 18.04.1 - would most likely work on macOS too.
 ```
 python3 -m venv
 source venv/bin/activate
@@ -21,17 +26,19 @@ tar xvzf pandoc-2.13-linux-amd64.tar.gz --strip-components 1 -C /usr/local/
 
 The easiest way to run a python script with CRON is to specify the python binary within
 the venv directory, as cron uses a shell different to bash and cannot activate the virtual environment.
-You will also need to add your $PATH to cron, as it does not use the default user's PATH - the pandoc binary won't be found
-otherwise.
+You will also need to add your `$PATH` to cron, as it does not use the default user's`$PATH` - the pandoc binary
+won't be found otherwise.
+
 Edit cron:
 ```
 crontab -e
 ```
 Add these lines:
 ```
-PATH=<output from $PATH here>
+PATH=<output from echo $PATH here>
 */15 15-20 * * 1-5 /path/to/repo/venv/bin/python /path/to/repo/main.py
 ```
+The cron runs every 15 minutes between 3pm and 8pm (system time), Monday - Friday.
 
 ## Add config variables
 
@@ -50,5 +57,6 @@ smpt_server = "smtp.gmail.com" Default SMTP host for gmail
 
 ## Set up Gmail filters:
 
-- This script is naive/lazy and is spoonfed already filtered emails to pick off - this avoids awkward IMAP search syntax.
-- You can import the premade `email_filter.xml` to your gmail in your account settings [here](https://mail.google.com/mail/u/0/?hl=en&shva=1#settings/filters)
+- This script is naive/lazy and is spoonfed pre-filtered emails to pick off - this avoids awkward IMAP searching.
+- You can import the premade filter `email_filter.xml` to your gmail in your account settings [here](https://mail.google.com/mail/u/0/?hl=en&shva=1#settings/filters).
+This will create a label called "Matt" with all the newsletters.
