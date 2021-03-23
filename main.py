@@ -1,19 +1,22 @@
 import imaplib
 import email
+import imaplib
+import logging
 import os
 import os.path
-
-import html2text
-import pypandoc
-from datetime import datetime
-
 import smtplib
 import ssl
-import config
+from datetime import datetime
 from email import encoders, utils
+from email.message import Message
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
+import html2text
+import pypandoc
+
+import config
 
 sender_email = config.email_account
 kindle_email = config.kindle_email
