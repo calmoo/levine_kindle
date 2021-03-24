@@ -14,6 +14,7 @@ from email.mime.text import MIMEText
 
 import html2text
 import pypandoc
+from bs4 import BeautifulSoup
 
 import config
 
@@ -33,7 +34,9 @@ def email_is_from_today(message: Message) -> bool:
     return received_time_utc.date() == datetime.today().date()
 
 
-def get_imap_session(imap_email:str, imap_password:str, imap_host:str) -> imaplib.IMAP4_SSL:
+def get_imap_session(
+    imap_email: str, imap_password: str, imap_host: str
+) -> imaplib.IMAP4_SSL:
     logging.info("Logging into IMAP")
     imap = imaplib.IMAP4_SSL(imap_host)
     imap.login(imap_email, imap_password)
@@ -63,11 +66,19 @@ def get_email_body(message: Message, imap_session: imaplib.IMAP4_SSL) -> str:
             return body
 
 
+def remove_ads(html: str) -> str:
+    soup = BeautifulSoup(html, "html.parser")
+    for div in soup.find_all("table", {"class": "sponsored-content"}):
+        div.decompose()
+    return str(soup)
+
+
 def format_text(text: str) -> str:
+    text_ads_removed = remove_ads(text)
     text_maker = html2text.HTML2Text()
     text_maker.ignore_links = True
     logging.info("Formatting to markdown")
-    markdown = text_maker.handle(text)
+    markdown = text_maker.handle(text_ads_removed)
     logging.info("Stripping header from markdown")
     start_index = markdown.find("##")
     markdown_formatted = markdown[start_index:]
