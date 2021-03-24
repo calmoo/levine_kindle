@@ -123,7 +123,7 @@ def send_to_kindle(filepath: str) -> None:
         logging.info("Logging in to SMTP")
         server.login(sender_email, password)
         logging.info("Sending email")
-        server.sendmail(sender_email, "test@test.com", text)
+        server.sendmail(sender_email, kindle_email, text)
 
 
 if __name__ == "__main__":
